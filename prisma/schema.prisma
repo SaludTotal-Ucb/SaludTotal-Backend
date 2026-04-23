@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model citas {
+  id                                   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  paciente_id                          String?      @db.Uuid
+  medico_id                            String?      @db.Uuid
+  clinica_id                           String?      @db.Uuid
+  fecha                                DateTime     @db.Date
+  hora                                 DateTime     @db.Time(6)
+  motivo                               String?
+  estado                               cita_estado? @default(pending)
+  notas_doctor                         String?
+  created_at                           DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime?    @default(now()) @db.Timestamptz(6)
+  clinicas                             clinicas?    @relation(fields: [clinica_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios_citas_medico_idTousuarios   usuarios?    @relation("citas_medico_idTousuarios", fields: [medico_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios_citas_paciente_idTousuarios usuarios?    @relation("citas_paciente_idTousuarios", fields: [paciente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model clinica_especialidades {
+  clinica_id      String         @db.Uuid
+  especialidad_id String         @db.Uuid
+  clinicas        clinicas       @relation(fields: [clinica_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  especialidades  especialidades @relation(fields: [especialidad_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([clinica_id, especialidad_id])
+}
+
+model clinicas {
+  id                     String                   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre                 String                   @db.VarChar(150)
+  ciudad                 String?                  @db.VarChar(100)
+  direccion              String
+  telefono               String?                  @db.VarChar(20)
+  email                  String?                  @db.VarChar(150)
+  horario                String?                  @db.VarChar(100)
+  descripcion            String?
+  created_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  citas                  citas[]
+  clinica_especialidades clinica_especialidades[]
+  detalles_medicos       detalles_medicos[]
+}
+
+model consultas_medicas {
+  id                   String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  expediente_id        String?                @db.Uuid
+  medico_encargado     String?                @db.Uuid
+  diagnostico          String                 @db.VarChar(255)
+  descripcion          String?
+  severidad            diagnostico_severidad?
+  tratamiento          String?
+  proxima_cita         DateTime?              @db.Date
+  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  expedientes_clinicos expedientes_clinicos?  @relation(fields: [expediente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios             usuarios?              @relation(fields: [medico_encargado], references: [id], onUpdate: NoAction)
+  recetas              recetas[]
+}
+
+model detalles_medicos {
+  usuario_id       String          @id @db.Uuid
+  clinica_id       String?         @db.Uuid
+  especialidad_id  String?         @db.Uuid
+  numero_licencia  String          @db.VarChar(50)
+  horario_atencion String?         @db.VarChar(100)
+  clinicas         clinicas?       @relation(fields: [clinica_id], references: [id], onUpdate: NoAction)
+  especialidades   especialidades? @relation(fields: [especialidad_id], references: [id], onUpdate: NoAction)
+  usuarios         usuarios        @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model especialidades {
+  id                     String                   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre                 String                   @unique @db.VarChar(100)
+  clinica_especialidades clinica_especialidades[]
+  detalles_medicos       detalles_medicos[]
+}
+
+model expedientes_clinicos {
+  id                      String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  paciente_id             String?             @unique @db.Uuid
+  alergias                String?
+  antecedentes_familiares String?
+  created_at              DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime?           @default(now()) @db.Timestamptz(6)
+  consultas_medicas       consultas_medicas[]
+  usuarios                usuarios?           @relation(fields: [paciente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model recetas {
+  id                String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  consulta_id       String?            @db.Uuid
+  medicamento       String             @db.VarChar(150)
+  dosis             String             @db.VarChar(100)
+  frecuencia        String             @db.VarChar(100)
+  indicaciones      String?
+  duracion_dias     Int?
+  consultas_medicas consultas_medicas? @relation(fields: [consulta_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model usuarios {
+  id                                String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                              String                @db.VarChar(150)
+  ci                                String                @db.VarChar(20)
+  email                             String                @unique @db.VarChar(150)
+  phone                             String?               @db.VarChar(20)
+  password                          String
+  rol                               rol_usuario
+  created_at                        DateTime?             @default(now()) @db.Timestamptz(6)
+  updated_at                        DateTime?             @default(now()) @db.Timestamptz(6)
+  citas_citas_medico_idTousuarios   citas[]               @relation("citas_medico_idTousuarios")
+  citas_citas_paciente_idTousuarios citas[]               @relation("citas_paciente_idTousuarios")
+  consultas_medicas                 consultas_medicas[]
+  detalles_medicos                  detalles_medicos?
+  expedientes_clinicos              expedientes_clinicos?
+}
+
+enum cita_estado {
+  pending
+  confirmed
+  completed
+  cancelled
+  absent
+}
+
+enum citas_estado_enum {
+  pending
+  confirmed
+  completed
+  cancelled
+  absent
+}
+
+enum diagnostico_severidad {
+  LEVE
+  MODERADO
+  GRAVE
+}
+
+enum penalizaciones_tipo_enum {
+  late_cancellation
+  multiple_absences
+}
+
+enum rol_usuario {
+  paciente
+  medico
+  admin
+}
