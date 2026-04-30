@@ -12,7 +12,7 @@ export class RegisterUseCase {
       throw new EmailRegistradoException();
     }
 
-    const newUser = new Usuario('', dto.name, dto.email, dto.phone);
+    const newUser = new Usuario('', dto.name, dto.ci, dto.email, dto.phone);
 
     return this.authRepository.save(newUser, dto.password);
   }

@@ -9,20 +9,32 @@ datasource db {
 }
 
 model citas {
-  id                                   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  paciente_id                          String?      @db.Uuid
-  medico_id                            String?      @db.Uuid
-  clinica_id                           String?      @db.Uuid
-  fecha                                DateTime     @db.Date
-  hora                                 DateTime     @db.Time(6)
-  motivo                               String?
-  estado                               cita_estado? @default(pending)
-  notas_doctor                         String?
-  created_at                           DateTime?    @default(now()) @db.Timestamptz(6)
-  updated_at                           DateTime?    @default(now()) @db.Timestamptz(6)
-  clinicas                             clinicas?    @relation(fields: [clinica_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  usuarios_citas_medico_idTousuarios   usuarios?    @relation("citas_medico_idTousuarios", fields: [medico_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  usuarios_citas_paciente_idTousuarios usuarios?    @relation("citas_paciente_idTousuarios", fields: [paciente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                                   String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  paciente_id                          String      @db.Uuid
+  medico_id                            String      @db.Uuid
+  fecha                                DateTime    @db.Timestamptz(6)
+  especialidad                         String      @db.VarChar(120)
+  estado                               cita_estado @default(pending)
+  notas                                String?
+  created_at                           DateTime?   @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime?   @updatedAt @db.Timestamptz(6)
+  usuarios_citas_medico_idTousuarios   usuarios    @relation("citas_medico_idTousuarios", fields: [medico_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios_citas_paciente_idTousuarios usuarios    @relation("citas_paciente_idTousuarios", fields: [paciente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([medico_id, fecha])
+  @@index([paciente_id, fecha])
+}
+
+model penalizaciones {
+  id          String                    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  paciente_id String                    @db.Uuid
+  motivo      penalizaciones_tipo_enum
+  fecha_fin   DateTime                  @db.Timestamptz(6)
+  created_at  DateTime?                 @default(now()) @db.Timestamptz(6)
+
+  usuarios    usuarios                  @relation(fields: [paciente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([paciente_id, fecha_fin])
 }
 
 model clinica_especialidades {
@@ -44,7 +56,6 @@ model clinicas {
   horario                String?                  @db.VarChar(100)
   descripcion            String?
   created_at             DateTime?                @default(now()) @db.Timestamptz(6)
-  citas                  citas[]
   clinica_especialidades clinica_especialidades[]
   detalles_medicos       detalles_medicos[]
 }
@@ -93,6 +104,19 @@ model expedientes_clinicos {
   usuarios                usuarios?           @relation(fields: [paciente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
+model historial_medicos {
+  id                    String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  paciente_id           String   @unique @db.Uuid
+  tipo_sangre           String   @db.VarChar(10)
+  alergias              String[] @default([])
+  tratamientos_en_curso String[] @default([])
+  afecciones            Json
+  created_at            DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime? @updatedAt @db.Timestamptz(6)
+
+  usuarios              usuarios @relation(fields: [paciente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
 model recetas {
   id                String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   consulta_id       String?            @db.Uuid
@@ -116,9 +140,25 @@ model usuarios {
   updated_at                        DateTime?             @default(now()) @db.Timestamptz(6)
   citas_citas_medico_idTousuarios   citas[]               @relation("citas_medico_idTousuarios")
   citas_citas_paciente_idTousuarios citas[]               @relation("citas_paciente_idTousuarios")
+  penalizaciones                    penalizaciones[]
   consultas_medicas                 consultas_medicas[]
   detalles_medicos                  detalles_medicos?
   expedientes_clinicos              expedientes_clinicos?
+  historial_medico                  historial_medicos?
+  refresh_tokens                    refresh_token[]
+}
+
+model refresh_token {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  token     String   @unique @db.Text
+  userId    String   @db.Uuid
+  expiresAt DateTime @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  usuario   usuarios @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+  @@index([token])
 }
 
 enum cita_estado {

@@ -15,6 +15,10 @@ export class HttpRegisterDto {
   @IsNotEmpty()
   name!: string;
 
+  @IsString()
+  @IsNotEmpty()
+  ci!: string;
+
   @IsEmail({}, { message: 'El email no es válido' })
   @IsNotEmpty()
   email!: string;
