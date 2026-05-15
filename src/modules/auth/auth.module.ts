@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PrismaModule } from '../../prisma/prisma.module';
 import { LoginUseCase } from './application/use-cases/LoginUseCase';
 import { LogoutUseCase } from './application/use-cases/LogoutUseCase';
 import { RefreshTokenUseCase } from './application/use-cases/RefreshTokenUseCase';
@@ -9,9 +10,10 @@ import { AuthController } from './infrastructure/http/controllers/auth.controlle
 import { SupabaseAuthRepository } from './infrastructure/persistence/SupabaseAuthRepository';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, PrismaModule],
   controllers: [AuthController],
   providers: [
+    SupabaseAuthRepository,
     {
       provide: I_AUTH_REPOSITORY,
       useClass: SupabaseAuthRepository,
