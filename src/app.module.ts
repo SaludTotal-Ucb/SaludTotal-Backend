@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { CitasModule } from './modules/citas/citas.module';
+import { HealthController } from './modules/health/health.controller';
 import { HistorialModule } from './modules/historial/historial.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -17,7 +18,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     CitasModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}

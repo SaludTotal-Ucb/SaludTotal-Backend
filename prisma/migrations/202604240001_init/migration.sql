@@ -1,4 +1,6 @@
-﻿-- CreateEnum
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- CreateEnum
 CREATE TYPE "cita_estado" AS ENUM ('pending', 'confirmed', 'completed', 'cancelled', 'absent');
 
 -- CreateEnum
@@ -210,3 +212,25 @@ ALTER TABLE "historial_medicos" ADD CONSTRAINT "historial_medicos_paciente_id_fk
 -- AddForeignKey
 ALTER TABLE "recetas" ADD CONSTRAINT "recetas_consulta_id_fkey" FOREIGN KEY ("consulta_id") REFERENCES "consultas_medicas"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
+-- CreateTable
+CREATE TABLE "refresh_token" (
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "token" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
+    "expiresAt" TIMESTAMPTZ(6) NOT NULL,
+    "createdAt" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "refresh_token_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "refresh_token_token_key" ON "refresh_token"("token");
+
+-- CreateIndex
+CREATE INDEX "refresh_token_userId_idx" ON "refresh_token"("userId");
+
+-- CreateIndex
+CREATE INDEX "refresh_token_token_idx" ON "refresh_token"("token");
+
+-- AddForeignKey
+ALTER TABLE "refresh_token" ADD CONSTRAINT "refresh_token_userId_fkey" FOREIGN KEY ("userId") REFERENCES "usuarios"("id") ON DELETE CASCADE ON UPDATE NO ACTION;

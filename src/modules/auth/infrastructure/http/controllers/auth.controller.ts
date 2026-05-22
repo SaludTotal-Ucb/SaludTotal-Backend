@@ -17,7 +17,7 @@ interface RefreshTokenDto {
   refreshToken: string;
 }
 
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(
     private readonly loginUseCase: LoginUseCase,
