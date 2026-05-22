@@ -20,10 +20,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@601291d996c5b77ee10b97d206f736de05403c68 # v4.0.3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -47,7 +47,7 @@ jobs:
         run: docker build -t backend:latest .
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-dist
           path: dist/
@@ -62,7 +62,7 @@ jobs:
       
     steps:
       - name: Download Build Artifact
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fc47ccb837 # v4.1.7
+        uses: actions/download-artifact@v4
         with:
           name: backend-dist
           path: dist/
