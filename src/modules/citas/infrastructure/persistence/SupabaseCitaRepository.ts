@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { Injectable } from '@nestjs/common';
-import type { PrismaService } from '../../../../prisma/prisma.service';
+import { Inject, Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../../prisma/prisma.service';
 import {
   Cita,
   type EstadoCita,
@@ -53,7 +53,7 @@ type PenalizacionesDelegate = {
 
 @Injectable()
 export class SupabaseCitaRepository implements ICitaRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<Cita | null> {
     const prisma = this.prisma as unknown as {

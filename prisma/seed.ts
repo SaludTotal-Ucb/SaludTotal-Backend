@@ -1,4 +1,9 @@
-import { PrismaClient, cita_estado, penalizaciones_tipo_enum, rol_usuario } from '@prisma/client';
+import {
+  PrismaClient,
+  cita_estado,
+  penalizaciones_tipo_enum,
+  rol_usuario,
+} from '@prisma/client';
 import * as bcryptjs from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -29,6 +34,19 @@ async function main() {
       phone: '70000002',
       password: passwordHash,
       rol: rol_usuario.medico,
+    },
+  });
+
+  await prisma.usuarios.upsert({
+    where: { email: 'admin.demo@saludtotal.com' },
+    update: {},
+    create: {
+      name: 'Admin Demo',
+      ci: 'CI-3001',
+      email: 'admin.demo@saludtotal.com',
+      phone: '70000003',
+      password: passwordHash,
+      rol: rol_usuario.admin,
     },
   });
 

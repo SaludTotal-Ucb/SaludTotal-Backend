@@ -15,7 +15,7 @@ import { HistorialException } from '../../../domain/exceptions/HistorialExceptio
 import type { HttpCrearHistorialDto } from '../dtos/crear-historial.dto';
 
 @UseGuards(JwtAuthGuard)
-@Controller('api/historial')
+@Controller('historial')
 export class HistorialController {
   constructor(
     private readonly obtenerHistorial: ObtenerHistorialPorPacienteUseCase,

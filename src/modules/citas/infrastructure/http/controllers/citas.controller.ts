@@ -16,7 +16,7 @@ import { CitaException } from '../../../domain/exceptions/CitaExceptions';
 import type { HttpAgendarCitaDto } from '../dtos/cita.dto';
 
 @UseGuards(JwtAuthGuard)
-@Controller('api/citas')
+@Controller('citas')
 export class CitasController {
   constructor(
     private readonly agendarCita: AgendarCitaUseCase,

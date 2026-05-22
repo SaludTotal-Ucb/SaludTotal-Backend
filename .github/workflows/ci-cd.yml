@@ -1,0 +1,75 @@
+name: Backend CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validation & Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@601291d996c5b77ee10b97d206f736de05403c68 # v4.0.3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Validate Docker Build Context
+        run: docker build -t backend:latest .
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        with:
+          name: backend-dist
+          path: dist/
+
+  deploy:
+    name: Deploy to Production
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.saludtotal.com # Simulated URL
+      
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fc47ccb837 # v4.1.7
+        with:
+          name: backend-dist
+          path: dist/
+
+      - name: Simulate Deployment
+        run: |
+          echo "🚀 Deploying Backend to Production environment..."
+          echo "Simulating upload of dist/ folder..."
+          sleep 2
+          echo "✅ Deployment successful!"
