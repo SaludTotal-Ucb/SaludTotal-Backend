@@ -2,28 +2,28 @@ name: Backend CI/CD Pipeline
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main" ] #se activa en la main cuando se hace un pull en main, si eliminamos esto puede que fucionemos un codigo roto 
   push:
-    branches: [ "main" ]
+    branches: [ "main" ] #si se elimina esto no se hara el despliegue automatico 
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+  group: ${{ github.workflow }}-${{ github.ref }} #agrupa las ejecuciones del mismo workflow y reference
+  cancel-in-progress: true #cancela las ejecuciones anteriores si se produce una nueva, es para evitar perdida de tiempo , si se cambia esto a false correra todo al mismo tiempo y puede generar incosistencias
+#si diggaos hacemos varios commits seguidos se haran en paralelo y pues esto puede hacer colgar los servicios y dejar una version antigua 
 permissions:
-  contents: read
+  contents: read #si se le pone none la descarga del checkout no se podra realizar
 
-jobs:
+jobs: #1er job
   validate:
-    name: Validation & Build
-    runs-on: ubuntu-latest
+    name: Validation & Build 
+    runs-on: ubuntu-latest #si se cambia a windows tarddara mas 
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 #clona el repo
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 #npm install 
         with:
           node-version: '20'
           cache: 'npm'
@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
+      - name: Generate Prisma Client #generar prisma bd local
         run: npx prisma generate
 
       - name: Run Linter
@@ -41,35 +41,35 @@ jobs:
         run: npm test
 
       - name: Build Application
-        run: npm run build
+        run: npm run build #crea la carpeta dist 
 
-      - name: Validate Docker Build Context
+      - name: Validate Docker Build Context #prueba si el docker esta en condiciones de ser construido y que los archivos del docker esten bien 
         run: docker build -t backend:latest .
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4 #valida todo antes de mandarlo al sig job 
         with:
           name: backend-dist
           path: dist/
 
-  deploy:
+  deploy: #2do job
     name: Deploy to Production
-    needs: validate
+    needs: validate #si se quita faallara porque correra en paralelo
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://api.saludtotal.com # Simulated URL
+      url: https://api.saludtotal.com # url simulada para cambiar en el final 
       
     steps:
       - name: Download Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4 #descarga todo lo validado anteriormente 
         with:
           name: backend-dist
           path: dist/
 
       - name: Simulate Deployment
         run: |
-          echo "🚀 Deploying Backend to Production environment..."
+          echo " Deploying Backend to Production environment..."
           echo "Simulating upload of dist/ folder..."
           sleep 2
-          echo "✅ Deployment successful!"
+          echo "Deployment successful!"

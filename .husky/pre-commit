@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged
+npx lint-staged #es un archivo que revisa si todo esta bien antes de hacer un commit, si falla no dejara hacer el commit 

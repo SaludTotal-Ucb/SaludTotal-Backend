@@ -6,17 +6,19 @@ import {
   HttpStatus,
   Post,
 } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { LoginUseCase } from '../../../application/use-cases/LoginUseCase';
 import type { LogoutUseCase } from '../../../application/use-cases/LogoutUseCase';
 import type { RefreshTokenUseCase } from '../../../application/use-cases/RefreshTokenUseCase';
 import type { RegisterUseCase } from '../../../application/use-cases/RegisterUseCase';
 import { AuthException } from '../../../domain/exceptions/AuthExceptions';
-import type { HttpLoginDto, HttpRegisterDto } from '../dtos/auth.dto';
+import { HttpLoginDto, HttpRegisterDto } from '../dtos/auth.dto';
 
-interface RefreshTokenDto {
+class HttpRefreshTokenDto {
   refreshToken: string;
 }
 
+@ApiTags('Autenticación')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -28,6 +30,17 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Iniciar sesión de usuario' })
+  @ApiBody({ type: HttpLoginDto })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Sesión iniciada con éxito. Retorna accessToken y refreshToken.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Credenciales inválidas (Unauthorized).',
+  })
   async login(@Body() body: HttpLoginDto) {
     try {
       const data = await this.loginUseCase.execute(body);
@@ -48,6 +61,17 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Registrar un nuevo Paciente' })
+  @ApiBody({ type: HttpRegisterDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Paciente registrado exitosamente.',
+  })
+  @ApiResponse({ status: 400, description: 'Datos del formulario inválidos.' })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflicto: el correo electrónico o CI ya están registrados.',
+  })
   async register(@Body() body: HttpRegisterDto) {
     try {
       const data = await this.registerUseCase.execute({
@@ -79,7 +103,16 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Body() body: RefreshTokenDto) {
+  @ApiOperation({
+    summary: 'Renovar el accessToken expirado usando un refreshToken válido',
+  })
+  @ApiBody({ type: HttpRefreshTokenDto })
+  @ApiResponse({ status: 200, description: 'Token renovado con éxito.' })
+  @ApiResponse({
+    status: 401,
+    description: 'El refresh token ha expirado o es inválido.',
+  })
+  async refresh(@Body() body: HttpRefreshTokenDto) {
     try {
       const data = await this.refreshTokenUseCase.execute(body.refreshToken);
       return {
@@ -103,7 +136,14 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@Body() body: RefreshTokenDto) {
+  @ApiOperation({ summary: 'Cerrar sesión e invalidar el refreshToken' })
+  @ApiBody({ type: HttpRefreshTokenDto })
+  @ApiResponse({ status: 204, description: 'Sesión cerrada con éxito.' })
+  @ApiResponse({
+    status: 401,
+    description: 'El refresh token es inválido o no existe.',
+  })
+  async logout(@Body() body: HttpRefreshTokenDto) {
     try {
       await this.logoutUseCase.execute(body.refreshToken);
       return;

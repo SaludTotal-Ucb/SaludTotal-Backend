@@ -15,9 +15,6 @@ export class CancelarCitaUseCase {
 
     const citaCancelada = cita.cancelar();
 
-    // Al cancelar más tarde debería gatillar penalización si queda poco tiempo.
-    // Lógica de negocio.
-
     return await this.repository.save(citaCancelada);
   }
 }

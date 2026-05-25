@@ -8,7 +8,7 @@ import { RegisterUseCase } from './application/use-cases/RegisterUseCase';
 import { I_AUTH_REPOSITORY } from './domain/repositories/IAuthRepository';
 import { AuthController } from './infrastructure/http/controllers/auth.controller';
 import { SupabaseAuthRepository } from './infrastructure/persistence/SupabaseAuthRepository';
-
+//conecta todo , inyecta dependencias
 @Module({
   imports: [ConfigModule, PrismaModule],
   controllers: [AuthController],

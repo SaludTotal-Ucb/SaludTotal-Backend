@@ -7,7 +7,7 @@ import { HistorialController } from './infrastructure/http/controllers/historial
 import { SupabaseHistorialRepository } from './infrastructure/persistence/SupabaseHistorialRepository';
 
 import { PrismaModule } from '../../prisma/prisma.module';
-
+//conecta todo, inyecta dependencias prisma, auth, etc
 @Module({
   imports: [PrismaModule, ConfigModule],
   controllers: [HistorialController],

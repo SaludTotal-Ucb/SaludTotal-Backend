@@ -5,7 +5,7 @@ export class Usuario {
     public readonly ci: string,
     public readonly email: string,
     public readonly phone?: string,
-    public readonly password?: string, // optional for responses
+    public readonly password?: string,
     public readonly roles: string[] = ['paciente'],
     public readonly createdAt?: Date,
   ) {}

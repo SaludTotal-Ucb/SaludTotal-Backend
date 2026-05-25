@@ -9,9 +9,9 @@ import type { IAuthRepository } from '../../domain/repositories/IAuthRepository'
 import { LoginUseCase } from './LoginUseCase';
 import { LogoutUseCase } from './LogoutUseCase';
 import { RegisterUseCase } from './RegisterUseCase';
-
+//test de autenticacion unit test
 describe('Auth Use Cases', () => {
-  // biome-ignore lint/suspicious/noExplicitAny: mock repository is untyped for testing ease
+  // biome-ignore lint/suspicious/noExplicitAny: mock repository is intentionally untyped
   let mockAuthRepository: any;
 
   beforeEach(() => {

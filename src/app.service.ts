@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
+//se mandan al app controller si la api esta levantada
 @Injectable()
 export class AppService {
   getStatus() {

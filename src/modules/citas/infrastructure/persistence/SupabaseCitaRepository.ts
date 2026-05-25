@@ -30,7 +30,7 @@ type PenalizacionDbRecord = {
 type CitasDelegate = {
   findUnique(args: { where: { id: string } }): Promise<CitaDbRecord | null>;
   findMany(args: {
-    where: { paciente_id: string };
+    where: { paciente_id?: string; medico_id?: string };
     orderBy: { fecha: 'desc' | 'asc' };
   }): Promise<CitaDbRecord[]>;
   upsert(args: {
@@ -77,6 +77,20 @@ export class SupabaseCitaRepository implements ICitaRepository {
     const citas = await prisma.citas.findMany({
       where: { paciente_id: pacienteId },
       orderBy: { fecha: 'desc' },
+    });
+
+    return citas.map((cita: CitaDbRecord) => this.toDomain(cita));
+  }
+
+  async findByMedicoId(medicoId: string): Promise<Cita[]> {
+    const prisma = this.prisma as unknown as {
+      citas: CitasDelegate;
+      penalizaciones: PenalizacionesDelegate;
+    };
+
+    const citas = await prisma.citas.findMany({
+      where: { medico_id: medicoId },
+      orderBy: { fecha: 'asc' },
     });
 
     return citas.map((cita: CitaDbRecord) => this.toDomain(cita));

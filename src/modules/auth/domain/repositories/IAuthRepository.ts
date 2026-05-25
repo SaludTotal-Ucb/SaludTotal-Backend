@@ -1,5 +1,5 @@
 import type { Usuario } from '../entities/Usuario';
-
+//bd crud
 export const I_AUTH_REPOSITORY = Symbol('IAuthRepository');
 
 export interface IAuthRepository {
