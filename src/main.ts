@@ -6,9 +6,11 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
+  //arranque inicial
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
+    //links donde se levanta el back
     origin: [
       'http://localhost',
       'http://127.0.0.1',
@@ -21,16 +23,15 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Set global route prefix
   app.setGlobalPrefix('api');
 
-  // Enable versioning (e.g. /api/v1/...)
+  //versionamiento
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
 
-  // Register global validation pipe
+  //validaciones globales, seguridad
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -39,10 +40,10 @@ async function bootstrap() {
     }),
   );
 
-  // Register global exception filter
+  //para errores
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Setup Swagger documentation
+  // Swagger
   const config = new DocumentBuilder()
     .setTitle('Salud Total API')
     .setDescription(

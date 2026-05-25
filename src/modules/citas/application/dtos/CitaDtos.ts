@@ -10,3 +10,4 @@ export interface CancelarCitaDto {
   citaId: string;
   pacienteId: string;
 }
+//plantilla

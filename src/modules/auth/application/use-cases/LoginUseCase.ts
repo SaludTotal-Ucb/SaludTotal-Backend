@@ -5,7 +5,7 @@ import {
 } from '../../domain/exceptions/AuthExceptions';
 import type { IAuthRepository } from '../../domain/repositories/IAuthRepository';
 import type { LoginDto } from '../dtos/AuthDtos';
-
+//no sabe nada de prisma ni de supabase, tampoco si la contrasenia esta con bcrypt, solo sabe que tiene que hacer estas acciones
 export class LoginUseCase {
   constructor(private readonly authRepository: IAuthRepository) {}
 
@@ -17,12 +17,10 @@ export class LoginUseCase {
       throw new UsuarioNoEncontradoException();
     }
 
-    // We assume verifyCredentials handles the implementation detail (like Supabase Auth)
-    // and throws if invalid, or returns the tokens.
     try {
       const result = await this.authRepository.verifyCredentials(
         dto.email,
-        dto.password,
+        dto.password, //nos devuelve un access token y un refresh token
       );
       return result;
     } catch {

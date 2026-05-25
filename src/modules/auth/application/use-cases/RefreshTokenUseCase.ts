@@ -13,21 +13,21 @@ export class RefreshTokenUseCase {
   async execute(
     refreshToken: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    // 1. Check if the refresh token exists in the database
+    //buscar el refresh token en la bd
     const storedToken =
       await this.authRepository.findRefreshToken(refreshToken);
     if (!storedToken) {
       throw new CredencialesInvalidasException();
     }
 
-    // 2. Check if it's expired
+    //verificar si el refresh token esta expirado
     if (storedToken.expiresAt < new Date()) {
       await this.authRepository.deleteRefreshToken(refreshToken);
       throw new CredencialesInvalidasException();
     }
 
     try {
-      // 3. Verify the JWT signature
+      // Verificar la firma JWT
       const refreshSecret =
         this.configService.get<string>('JWT_REFRESH_SECRET') ||
         'default_refresh_secret';
@@ -35,13 +35,13 @@ export class RefreshTokenUseCase {
         sub: string;
       };
 
-      // 4. Get user to include current role in new token
+      //verificar si el usuario existe
       const user = await this.authRepository.findById(payload.sub);
       if (!user) {
         throw new CredencialesInvalidasException();
       }
 
-      // 5. Generate new token pair
+      //generar nuevo par de access tokens duran 15 minutos y refresh tokens duran 7 dias
       const secret =
         this.configService.get<string>('JWT_SECRET') || 'default_secret_key';
       const expiresIn = (this.configService.get<string>('JWT_EXPIRES_IN') ??
@@ -63,7 +63,7 @@ export class RefreshTokenUseCase {
         expiresIn: newRefreshExpiresIn,
       });
 
-      // 6. Rotate: delete old refresh token, store the new one
+      //actualizar el refresh token en la base de datos
       await this.authRepository.deleteRefreshToken(refreshToken);
       const expirationDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       await this.authRepository.saveRefreshToken(

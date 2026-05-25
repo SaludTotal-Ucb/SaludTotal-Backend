@@ -5,7 +5,7 @@ import {
 } from '../../domain/exceptions/CitaExceptions';
 import type { ICitaRepository } from '../../domain/repositories/ICitaRepository';
 import type { CrearCitaDto } from '../dtos/CitaDtos';
-
+//logica del negocio
 export class AgendarCitaUseCase {
   constructor(private readonly repository: ICitaRepository) {}
 

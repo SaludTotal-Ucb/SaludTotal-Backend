@@ -5,7 +5,7 @@ import {
   HistorialMedico,
 } from '../../domain/entities/HistorialMedico';
 import type { IHistorialRepository } from '../../domain/repositories/IHistorialRepository';
-
+// plantillas para la bd, tipos de datos que se esperan en la bd
 type AfeccionDbRecord = {
   problema: string;
   severidad: string;

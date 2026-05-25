@@ -1,3 +1,5 @@
+//verifica el rol que tienes y es para que no entres a lugares donde no te pertenece,
+//ejemplo: no puedes entrar a la ruta de un medico si no eres medico, solo tu rol es paciente
 import {
   type CanActivate,
   type ExecutionContext,
@@ -46,3 +48,4 @@ export class RolesGuard implements CanActivate {
 export function createRolesGuard(roles: string[]): RolesGuard {
   return new RolesGuard(roles);
 }
+//si no hay habria un fallo de autorizaciion dependiendo roles y codigo sucio

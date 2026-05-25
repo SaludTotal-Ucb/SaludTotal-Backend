@@ -10,3 +10,4 @@ export class AppController {
     return this.appService.getStatus();
   }
 }
+//sirve para entrar a la pagina principal y ver si la api esta corriendo

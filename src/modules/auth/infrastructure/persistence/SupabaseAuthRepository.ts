@@ -10,7 +10,7 @@ import { Usuario } from '../../domain/entities/Usuario';
 import { CredencialesInvalidasException } from '../../domain/exceptions/AuthExceptions';
 import type { IAuthRepository } from '../../domain/repositories/IAuthRepository';
 import type { JwtPayload } from '../http/middlewares/jwt-auth.guard';
-
+// es el que busca la info para encriptar , busca datos escribe las firmas oficiales
 @Injectable()
 export class SupabaseAuthRepository implements IAuthRepository {
   constructor(
@@ -41,7 +41,7 @@ export class SupabaseAuthRepository implements IAuthRepository {
     passwordPlain: string,
   ): Promise<Usuario> {
     const id = randomUUID();
-    const hash = await bcryptjs.hash(passwordPlain, 10);
+    const hash = await bcryptjs.hash(passwordPlain, 10); //aca encripta a la hora de guardar con un peso de 10
 
     const saved = await this.prisma.usuarios.create({
       data: {
@@ -99,7 +99,7 @@ export class SupabaseAuthRepository implements IAuthRepository {
       expiresIn: refreshExpiresIn,
     });
 
-    // Store refresh token in database
+    // guarda refresh token en la bd
     const expirationDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await this.prisma.refresh_token.create({
       data: {
@@ -153,10 +153,7 @@ export class SupabaseAuthRepository implements IAuthRepository {
     await this.deleteRefreshToken(refreshToken);
   }
 
-  async generatePasswordResetToken(_email: string): Promise<void> {
-    // Password reset functionality available in future releases
-  }
-
+  async generatePasswordResetToken(_email: string): Promise<void> {} //sig sprint olvide mi contraseña
   async generateToken(user: Usuario): Promise<string> {
     const secret =
       this.configService.get<string>('JWT_SECRET') || 'default_secret_key';

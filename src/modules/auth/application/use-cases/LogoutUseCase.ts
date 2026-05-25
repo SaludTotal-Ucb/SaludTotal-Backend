@@ -6,10 +6,10 @@ export class LogoutUseCase {
 
   async execute(refreshToken: string): Promise<void> {
     if (!refreshToken) {
-      throw new CredencialesInvalidasException();
+      throw new CredencialesInvalidasException(); //si no hay refresh token, no se puede cerrar sesion
     }
 
-    // Invalidate the refresh token by deleting it from database
+    // Invalida el refresh token eliminadolo de la base de datos
     await this.authRepository.logout(refreshToken);
   }
 }
