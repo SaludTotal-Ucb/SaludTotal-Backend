@@ -22,12 +22,17 @@ import {
 import { GetUserId } from '../../../../../common/decorators/get-user-id.decorator';
 import { PrismaService } from '../../../../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../../../auth/infrastructure/http/middlewares/jwt-auth.guard';
-import type { AgendarCitaUseCase } from '../../../application/use-cases/AgendarCitaUseCase';
-import type { CancelarCitaUseCase } from '../../../application/use-cases/CancelarCitaUseCase';
-import type { ObtenerCitasMedicoUseCase } from '../../../application/use-cases/ObtenerCitasMedicoUseCase';
-import type { ObtenerCitasPacienteUseCase } from '../../../application/use-cases/ObtenerCitasPacienteUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { AgendarCitaUseCase } from '../../../application/use-cases/AgendarCitaUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { CancelarCitaUseCase } from '../../../application/use-cases/CancelarCitaUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { ObtenerCitasMedicoUseCase } from '../../../application/use-cases/ObtenerCitasMedicoUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { ObtenerCitasPacienteUseCase } from '../../../application/use-cases/ObtenerCitasPacienteUseCase';
 import { CitaException } from '../../../domain/exceptions/CitaExceptions';
-import type { HttpAgendarCitaDto } from '../dtos/cita.dto';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { HttpAgendarCitaDto } from '../dtos/cita.dto';
 
 @ApiTags('Citas')
 @ApiBearerAuth()

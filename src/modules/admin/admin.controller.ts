@@ -16,6 +16,13 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { GetUserId } from '../../common/decorators/get-user-id.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../auth/infrastructure/http/middlewares/jwt-auth.guard';
@@ -26,36 +33,50 @@ class CreateClinicDto {
     example: 'Clínica del Norte',
     description: 'Nombre de la clínica',
   })
+  @IsString()
+  @IsNotEmpty()
   nombre: string;
 
   @ApiProperty({ example: 'Santa Cruz', description: 'Ciudad donde se ubica' })
+  @IsString()
+  @IsNotEmpty()
   ciudad: string;
 
   @ApiProperty({
     example: 'Av. Banzer #456, Zona Norte',
     description: 'Dirección completa',
   })
+  @IsString()
+  @IsNotEmpty()
   direccion: string;
 
   @ApiProperty({ example: '33445566', description: 'Teléfono de contacto' })
+  @IsString()
+  @IsOptional()
   telefono: string;
 
   @ApiProperty({
     example: 'contacto@clinicanorte.com',
     description: 'Correo electrónico',
   })
+  @IsEmail()
+  @IsOptional()
   email: string;
 
   @ApiProperty({
     example: 'Lunes a Viernes 08:00 - 20:00',
     description: 'Horario de atención',
   })
+  @IsString()
+  @IsOptional()
   horario: string;
 
   @ApiProperty({
     example: 'Atención médica general y especializada.',
     description: 'Breve descripción de la clínica',
   })
+  @IsString()
+  @IsOptional()
   descripcion: string;
 
   @ApiProperty({
@@ -63,6 +84,9 @@ class CreateClinicDto {
     description: 'Listado de especialidades disponibles en la clínica',
     type: [String],
   })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
   especialidades: string[];
 }
 
@@ -71,45 +95,63 @@ class CreateDoctorDto {
     example: 'Dr. Alejandro Ortiz',
     description: 'Nombre completo del médico',
   })
+  @IsString()
+  @IsNotEmpty()
   name: string;
 
   @ApiProperty({ example: 'CI-4001', description: 'Cédula de identidad' })
+  @IsString()
+  @IsNotEmpty()
   ci: string;
 
   @ApiProperty({
     example: 'alejandro.ortiz@saludtotal.com',
     description: 'Correo electrónico del médico',
   })
+  @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @ApiProperty({ example: '70000005', description: 'Teléfono de contacto' })
+  @IsString()
+  @IsOptional()
   phone: string;
 
   @ApiProperty({
     example: 'Password123!',
     description: 'Contraseña para la cuenta del médico',
   })
+  @IsString()
+  @IsNotEmpty()
   passwordPlain: string;
 
   @ApiProperty({
     example: '11111111-1111-1111-1111-111111111111',
     description: 'ID de la clínica asignada',
   })
+  @IsString()
+  @IsNotEmpty()
   clinicaId: string;
 
   @ApiProperty({
     example: 'Medicina General',
     description: 'Especialidad médica',
   })
+  @IsString()
+  @IsNotEmpty()
   especialidad: string;
 
   @ApiProperty({ example: 'LM-4001', description: 'Número de licencia médica' })
+  @IsString()
+  @IsNotEmpty()
   numeroLicencia: string;
 
   @ApiProperty({
     example: 'Lunes a Viernes 08:00 - 14:00',
     description: 'Horario de consulta',
   })
+  @IsString()
+  @IsOptional()
   horarioAtencion: string;
 }
 

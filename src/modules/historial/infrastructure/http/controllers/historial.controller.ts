@@ -21,8 +21,10 @@ import { diagnostico_severidad } from '@prisma/client';
 import { GetUserId } from '../../../../../common/decorators/get-user-id.decorator';
 import { PrismaService } from '../../../../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../../../auth/infrastructure/http/middlewares/jwt-auth.guard';
-import type { CrearHistorialUseCase } from '../../../application/use-cases/CrearHistorialUseCase';
-import type { ObtenerHistorialPorPacienteUseCase } from '../../../application/use-cases/ObtenerHistorialPorPacienteUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { CrearHistorialUseCase } from '../../../application/use-cases/CrearHistorialUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { ObtenerHistorialPorPacienteUseCase } from '../../../application/use-cases/ObtenerHistorialPorPacienteUseCase';
 import { HistorialException } from '../../../domain/exceptions/HistorialExceptions';
 import { HttpCrearHistorialDto } from '../dtos/crear-historial.dto';
 

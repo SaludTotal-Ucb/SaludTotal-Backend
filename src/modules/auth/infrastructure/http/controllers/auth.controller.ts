@@ -7,10 +7,14 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import type { LoginUseCase } from '../../../application/use-cases/LoginUseCase';
-import type { LogoutUseCase } from '../../../application/use-cases/LogoutUseCase';
-import type { RefreshTokenUseCase } from '../../../application/use-cases/RefreshTokenUseCase';
-import type { RegisterUseCase } from '../../../application/use-cases/RegisterUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { LoginUseCase } from '../../../application/use-cases/LoginUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { LogoutUseCase } from '../../../application/use-cases/LogoutUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { RefreshTokenUseCase } from '../../../application/use-cases/RefreshTokenUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { RegisterUseCase } from '../../../application/use-cases/RegisterUseCase';
 import { AuthException } from '../../../domain/exceptions/AuthExceptions';
 import { HttpLoginDto, HttpRegisterDto } from '../dtos/auth.dto';
 
