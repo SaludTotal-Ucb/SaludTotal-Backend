@@ -111,7 +111,7 @@ export class HistorialController {
             id: consulta.id,
             diagnostico: consulta.diagnostico,
             descripcion: consulta.descripcion,
-            tratamiento: consulta.treatment || consulta.tratamiento || '',
+            tratamiento: consulta.tratamiento || '',
             medico_encargado:
               consulta.usuarios?.name || 'Médico no especificado',
             fecha: consulta.created_at
@@ -183,7 +183,8 @@ export class HistorialController {
   })
   async crearHistorialHandler(
     @GetUserId() userId: string,
-    @Body() body: Record<string, unknown>,
+    // biome-ignore lint/suspicious/noExplicitAny: polymorphic request body
+    @Body() body: any,
   ) {
     // Si viene paciente_id en el body, asumimos que es un registro de consulta médica hecho por un médico
     if (body.paciente_id) {
