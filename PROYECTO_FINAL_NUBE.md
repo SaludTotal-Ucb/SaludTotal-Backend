@@ -63,18 +63,28 @@ La infraestructura está desplegada bajo la "Ruta A" (AWS Learner Lab), adaptada
 
 ---
 
-## 3. Registro de Decisiones de Arquitectura (ADR)
+### 3. Registro de Decisiones de Arquitectura (ADR)
 
-### ADR-001: Uso de K3s autohospedado en EC2 en lugar de Amazon EKS
-*   **Contexto:** Se requiere un entorno de orquestación de contenedores en AWS para desplegar los microservicios del proyecto. AWS ofrece EKS como servicio gestionado, pero el entorno del proyecto es el AWS Learner Lab.
-*   **Restricciones:** El Learner Lab impone políticas estrictas de IAM (`LabRole`), que en muchos casos bloquean la creación de los roles específicos (Service-Linked Roles) necesarios para inicializar un clúster de EKS de manera limpia. Además, el costo base de control plane de EKS (~$73/mes) excede el límite de $50 USD.
-*   **Decisión:** Se optó por levantar una instancia EC2 (t3.medium) e instalar y configurar K3s (distribución ligera de Kubernetes de Rancher) manualmente.
-*   **Consecuencias:** Se requiere gestión manual del clúster y nodos (actualizaciones, backups). Sin embargo, garantiza el cumplimiento del presupuesto, evita los bloqueos de permisos IAM en el Lab, y permite demostrar las competencias de orquestación de contenedores exigidas en la rúbrica.
+#### ADR-001: Uso de K3s autohospedado en EC2 en lugar de Amazon EKS
+* **Estado:** Aceptada
+* **Contexto y Problema:** El entorno de AWS Academy Learner Lab prohíbe explícitamente la creación de nuevos roles IAM, lo cual es un requisito estricto para desplegar un clúster administrado con Amazon EKS. Además, el costo fijo por hora de EKS consumiría rápidamente el límite estricto de $50 USD del laboratorio.
+* **Opciones Consideradas:** 1. Amazon EKS (Servicio administrado por AWS).
+  2. K3s (Distribución ligera de Kubernetes) sobre una instancia EC2.
+* **Decisión Tomada:** Implementar la **Opción 2** (K3s sobre instancia EC2 `t3.medium`).
+* **Justificación:** K3s permite empaquetar, orquestar y escalar los contenedores de la aplicación "Salud Total" operando de forma nativa bajo el `LabInstanceProfile` preexistente. Esto evade las trabas administrativas de IAM, garantiza compatibilidad total con los manifiestos de Kubernetes (Deployment, Service, HPA) exigidos en la rúbrica, y mantiene el costo operativo alrededor de los $15 USD mensuales.
+* **Consecuencias Positivas:** Control total del clúster, optimización extrema de costos y cumplimiento técnico del Pilar 1 sin violar políticas del Learner Lab.
+* **Consecuencias Negativas:** Se asume la gestión manual del clúster y la carencia de alta disponibilidad nativa al operar en un esquema *Single-Node*.
 
-### ADR-002: Desacoplamiento de Base de Datos mediante AWS RDS (PostgreSQL)
-*   **Contexto:** Los pods del backend (NestJS) en Kubernetes requieren almacenamiento persistente para los datos transaccionales médicos.
-*   **Decisión:** Se decidió no alojar la base de datos dentro del clúster de K3s. En su lugar, se provisiona una instancia gestionada de AWS RDS para PostgreSQL (capa gratuita o db.t3.micro).
-*   **Consecuencias:** Permite escalar los pods del backend (stateless) horizontalmente (HPA) sin riesgo de corromper datos. AWS RDS maneja la tolerancia a fallos, backups automatizados y alta disponibilidad. Se mejora la resiliencia de la arquitectura a cambio de una ligera latencia de red entre la EC2 y RDS, la cual es mitigable dentro de la misma VPC.
+#### ADR-002: Desacoplamiento de Base de Datos utilizando Supabase (BaaS) en lugar de AWS RDS
+* **Estado:** Aceptada
+* **Contexto y Problema:** Desplegar una base de datos transaccional dentro de los pods de Kubernetes (como un contenedor volátil) representa un riesgo crítico de pérdida de datos médicos. Por otro lado, aprovisionar un clúster de AWS RDS PostgreSQL sumaría costos adicionales que pondrían en riesgo el límite de presupuesto mensual del Learner Lab.
+* **Opciones Consideradas:** 1. Base de datos PostgreSQL contenerizada en K3s con PersistentVolumes.
+  2. AWS RDS for PostgreSQL.
+  3. Supabase (PostgreSQL administrado como servicio - BaaS).
+* **Decisión Tomada:** Implementar la **Opción 3** (Supabase).
+* **Justificación:** Adoptar Supabase permite mantener la capa de persistencia 100% desacoplada de la capa de cómputo (cumpliendo el nivel Excelente del Pilar 1) sin consumir recursos de cómputo del servidor EC2 ni presupuesto de AWS. Supabase ofrece PostgreSQL administrado en la nube con un *free tier* generoso que soporta holgadamente la carga de la aplicación médica, aislando los datos de manera segura fuera de la instancia de EC2.
+* **Consecuencias Positivas:** Ahorro total del presupuesto de base de datos en AWS, inyección directa de variables de entorno mediante secretos (`DATABASE_URL`), y alta disponibilidad de los datos.
+* **Consecuencias Negativas:** Dependencia de red hacia un proveedor externo (Supabase) ajeno a la VPC de AWS.
 
 ---
 
@@ -84,7 +94,7 @@ Para aplicar las actualizaciones de forma manual en el clúster o verificar el e
 
 1.  **Conexión por SSH a la EC2 (K3s Control Plane):**
     ```bash
-    ssh -i "clave_acceso.pem" ubuntu@<EC2_PUBLIC_IP>
+    ssh -i "clave_acceso.pem" ubuntu@<98.93.36.3>
     ```
 2.  **Verificación de Nodos y Pods:**
     ```bash
