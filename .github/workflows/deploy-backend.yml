@@ -1,0 +1,51 @@
+name: Deploy Backend to EKS
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_region:
+        description: 'AWS Region'
+        required: true
+        default: 'us-east-1'
+      cluster_name:
+        description: 'EKS Cluster Name'
+        required: true
+        default: 'salud-total-cluster'
+      aws_access_key_id:
+        description: 'AWS Access Key ID (Temporary)'
+        required: true
+      aws_secret_access_key:
+        description: 'AWS Secret Access Key (Temporary)'
+        required: true
+      aws_session_token:
+        description: 'AWS Session Token (Temporary)'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ github.event.inputs.aws_access_key_id }}
+          aws-secret-access-key: ${{ github.event.inputs.aws_secret_access_key }}
+          aws-session-token: ${{ github.event.inputs.aws_session_token }}
+          aws-region: ${{ github.event.inputs.aws_region }}
+
+      - name: Update Kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ github.event.inputs.cluster_name }} --region ${{ github.event.inputs.aws_region }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/secrets.yaml
+          kubectl apply -f k8s/backend-deployment.yaml
+          kubectl apply -f k8s/hpa.yaml
+
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/saludtotal-backend
