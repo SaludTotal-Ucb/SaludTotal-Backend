@@ -2,9 +2,9 @@ name: Backend CI/CD Pipeline
 
 on:
   pull_request:
-    branches: [ "main" ] #se activa en la main cuando se hace un pull en main, si eliminamos esto puede que fucionemos un codigo roto 
+    branches: [ "main" , "compu"] #se activa en la main cuando se hace un pull en main, si eliminamos esto puede que fucionemos un codigo roto 
   push:
-    branches: [ "main" ] #si se elimina esto no se hara el despliegue automatico 
+    branches: [ "main" , "compu"] #si se elimina esto no se hara el despliegue automatico 
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }} #agrupa las ejecuciones del mismo workflow y reference
