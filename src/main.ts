@@ -9,16 +9,19 @@ async function bootstrap() {
   //arranque inicial
   const app = await NestFactory.create(AppModule);
 
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
+    : [
+        'http://localhost',
+        'http://127.0.0.1',
+        'http://localhost:5174',
+        'http://127.0.0.1:5174',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+      ];
+
   app.enableCors({
-    //links donde se levanta el back
-    origin: [
-      'http://localhost',
-      'http://127.0.0.1',
-      'http://localhost:5174',
-      'http://127.0.0.1:5174',
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-    ],
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
