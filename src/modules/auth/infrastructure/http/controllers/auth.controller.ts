@@ -84,6 +84,11 @@ export class AuthController {
         email: body.email,
         password: body.password,
         phone: body.phone,
+        birthDate: body.birthDate,
+        gender: body.gender,
+        bloodType: body.bloodType,
+        address: body.address,
+        emergencyContact: body.emergencyContact,
       });
 
       return {

@@ -55,4 +55,49 @@ export class HttpRegisterDto {
   @IsString()
   @IsOptional()
   phone?: string;
+
+  @ApiProperty({
+    example: '15/05/1990',
+    description: 'Fecha de nacimiento',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  birthDate?: string;
+
+  @ApiProperty({
+    example: 'Femenino',
+    description: 'Género',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  gender?: string;
+
+  @ApiProperty({
+    example: 'O+',
+    description: 'Tipo de sangre',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  bloodType?: string;
+
+  @ApiProperty({
+    example: 'Av. 6 de Agosto #1234, La Paz',
+    description: 'Dirección residencial',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @ApiProperty({
+    example: 'Juan García - 71234567',
+    description: 'Contacto de emergencia',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  emergencyContact?: string;
 }

@@ -5,7 +5,17 @@ export const I_AUTH_REPOSITORY = Symbol('IAuthRepository');
 export interface IAuthRepository {
   findByEmail(email: string): Promise<Usuario | null>;
   findById(id: string): Promise<Usuario | null>;
-  save(usuario: Omit<Usuario, 'id'>, passwordPlain: string): Promise<Usuario>;
+  save(
+    usuario: Omit<Usuario, 'id'>,
+    passwordPlain: string,
+    profileData?: {
+      birthDate?: string;
+      gender?: string;
+      bloodType?: string;
+      address?: string;
+      emergencyContact?: string;
+    },
+  ): Promise<Usuario>;
   verifyCredentials(
     email: string,
     passwordPlain: string,

@@ -14,7 +14,13 @@ export class RegisterUseCase {
 
     const newUser = new Usuario('', dto.name, dto.ci, dto.email, dto.phone);
 
-    return this.authRepository.save(newUser, dto.password);
+    return this.authRepository.save(newUser, dto.password, {
+      birthDate: dto.birthDate,
+      gender: dto.gender,
+      bloodType: dto.bloodType,
+      address: dto.address,
+      emergencyContact: dto.emergencyContact,
+    });
   }
 }
 //si no hay nadie se puede registrar, habrian correos repetidos, codigo desorganizado
