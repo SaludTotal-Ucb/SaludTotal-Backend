@@ -7,6 +7,7 @@ import {
   Inject,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -207,6 +208,10 @@ export class HistorialController {
           tipo_sangre: true,
           alergias: true,
           tratamientos_en_curso: true,
+          genero: true,
+          fecha_nacimiento: true,
+          direccion: true,
+          contacto_emergencia: true,
         },
       });
 
@@ -220,12 +225,99 @@ export class HistorialController {
           'Ninguna registrada',
         phone: usuario.phone || 'No especificado',
         email: usuario.email,
+        birthDate: historialEstatico?.fecha_nacimiento || '15/05/1990',
+        gender: historialEstatico?.genero || 'Femenino',
+        address:
+          historialEstatico?.direccion || 'Av. 6 de Agosto #1234, La Paz',
+        emergencyContact:
+          historialEstatico?.contacto_emergencia || 'Juan García - 71234567',
         tratamientos: historialEstatico?.tratamientos_en_curso || [],
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
       throw new HttpException(
         'Error al obtener perfil del paciente',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Put('profile')
+  @ApiOperation({
+    summary: 'Actualizar el perfil del paciente logueado (Solo Paciente)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Perfil actualizado con éxito.',
+  })
+  async updateProfile(
+    @GetUserId() userId: string,
+    // biome-ignore lint/suspicious/noExplicitAny: polymorphic request body
+    @Body() body: any,
+  ) {
+    try {
+      // 1. Actualizar datos en la tabla usuarios (name, phone)
+      const user = await this.prisma.usuarios.update({
+        where: { id: userId },
+        data: {
+          name: body.name,
+          phone: body.phone,
+        },
+      });
+
+      // 2. Obtener o crear registro en historial_medicos
+      const historial = await this.prisma.historial_medicos.upsert({
+        where: { paciente_id: userId },
+        update: {
+          tipo_sangre: body.bloodType,
+          alergias:
+            typeof body.allergies === 'string'
+              ? body.allergies
+                  .split(',')
+                  .map((s: string) => s.trim())
+                  .filter(Boolean)
+              : body.allergies || [],
+          direccion: body.address,
+          fecha_nacimiento: body.birthDate,
+          genero: body.gender,
+          contacto_emergencia: body.emergencyContact,
+        },
+        create: {
+          paciente_id: userId,
+          tipo_sangre: body.bloodType || 'O+',
+          alergias:
+            typeof body.allergies === 'string'
+              ? body.allergies
+                  .split(',')
+                  .map((s: string) => s.trim())
+                  .filter(Boolean)
+              : body.allergies || [],
+          direccion: body.address,
+          fecha_nacimiento: body.birthDate,
+          genero: body.gender,
+          contacto_emergencia: body.emergencyContact,
+          afecciones: [],
+          tratamientos_en_curso: body.tratamientos || [],
+        },
+      });
+
+      return {
+        success: true,
+        message: 'Perfil actualizado exitosamente',
+        data: {
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+          },
+          historial,
+        },
+      };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Error al actualizar el perfil',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

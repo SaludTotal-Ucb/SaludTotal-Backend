@@ -14,5 +14,9 @@ export class HistorialMedico {
     public readonly alergias: string[],
     public readonly tratamientosEnCurso: string[],
     public readonly afecciones: EnfoqueAfeccion[],
+    public readonly genero?: string,
+    public readonly fechaNacimiento?: string,
+    public readonly direccion?: string,
+    public readonly contactoEmergencia?: string,
   ) {}
 }

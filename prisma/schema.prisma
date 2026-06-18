@@ -113,6 +113,10 @@ model historial_medicos {
   afecciones            Json
   created_at            DateTime? @default(now()) @db.Timestamptz(6)
   updated_at            DateTime? @updatedAt @db.Timestamptz(6)
+  genero                String?   @db.VarChar(50)
+  fecha_nacimiento      String?   @db.VarChar(50)
+  direccion             String?   @db.Text
+  contacto_emergencia   String?   @db.Text
 
   usuarios              usuarios @relation(fields: [paciente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
