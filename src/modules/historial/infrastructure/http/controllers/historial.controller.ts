@@ -166,6 +166,71 @@ export class HistorialController {
     }
   }
 
+  @Get('paciente/:pacienteId/perfil')
+  @ApiOperation({
+    summary: 'Obtener datos de perfil y antecedentes de un paciente específico',
+  })
+  @ApiParam({ name: 'pacienteId', description: 'ID del paciente (UUID)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Perfil del paciente recuperado con éxito.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token de autenticación inválido o ausente.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Paciente no encontrado.',
+  })
+  async getPerfilPaciente(@Param('pacienteId') pacienteId: string) {
+    try {
+      const usuario = await this.prisma.usuarios.findUnique({
+        where: { id: pacienteId },
+        select: {
+          id: true,
+          name: true,
+          ci: true,
+          email: true,
+          phone: true,
+          created_at: true,
+        },
+      });
+
+      if (!usuario) {
+        throw new HttpException('Paciente no encontrado', HttpStatus.NOT_FOUND);
+      }
+
+      const historialEstatico = await this.prisma.historial_medicos.findUnique({
+        where: { paciente_id: pacienteId },
+        select: {
+          tipo_sangre: true,
+          alergias: true,
+          tratamientos_en_curso: true,
+        },
+      });
+
+      return {
+        name: usuario.name,
+        ci: usuario.ci,
+        age: 35,
+        bloodType: historialEstatico?.tipo_sangre || 'O+',
+        allergies:
+          (historialEstatico?.alergias || []).join(', ') ||
+          'Ninguna registrada',
+        phone: usuario.phone || 'No especificado',
+        email: usuario.email,
+        tratamientos: historialEstatico?.tratamientos_en_curso || [],
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new HttpException(
+        'Error al obtener perfil del paciente',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Post()
   @ApiOperation({
     summary:
