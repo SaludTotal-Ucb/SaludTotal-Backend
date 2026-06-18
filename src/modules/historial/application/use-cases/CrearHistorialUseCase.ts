@@ -20,6 +20,10 @@ export class CrearHistorialUseCase {
       dto.alergias,
       dto.tratamientosEnCurso,
       afecciones,
+      dto.genero,
+      dto.fechaNacimiento,
+      dto.direccion,
+      dto.contactoEmergencia,
     );
 
     return await this.repo.save(historial);

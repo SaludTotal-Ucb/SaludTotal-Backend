@@ -19,6 +19,10 @@ type HistorialDbRecord = {
   alergias: string[];
   tratamientos_en_curso: string[];
   afecciones: unknown;
+  genero?: string | null;
+  fecha_nacimiento?: string | null;
+  direccion?: string | null;
+  contacto_emergencia?: string | null;
 };
 
 type HistorialDelegate = {
@@ -90,6 +94,10 @@ export class SupabaseHistorialRepository implements IHistorialRepository {
       alergias: historial.alergias,
       tratamientos_en_curso: historial.tratamientosEnCurso,
       afecciones: historial.afecciones,
+      genero: historial.genero ?? null,
+      fecha_nacimiento: historial.fechaNacimiento ?? null,
+      direccion: historial.direccion ?? null,
+      contacto_emergencia: historial.contactoEmergencia ?? null,
     };
   }
 
@@ -101,6 +109,10 @@ export class SupabaseHistorialRepository implements IHistorialRepository {
       historial.alergias,
       historial.tratamientos_en_curso,
       this.toAfeccionesDomain(historial.afecciones),
+      historial.genero ?? undefined,
+      historial.fecha_nacimiento ?? undefined,
+      historial.direccion ?? undefined,
+      historial.contacto_emergencia ?? undefined,
     );
   }
 

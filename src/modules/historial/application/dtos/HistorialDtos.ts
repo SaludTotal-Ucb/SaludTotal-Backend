@@ -8,4 +8,8 @@ export interface CrearHistorialDto {
     severidad: string;
     diagnostico: string;
   }>;
+  genero?: string;
+  fechaNacimiento?: string;
+  direccion?: string;
+  contactoEmergencia?: string;
 }
