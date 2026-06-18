@@ -285,18 +285,21 @@ export class CitasController {
       const pacienteIds = filtered.map((c) => c.pacienteId).filter(Boolean);
       const pacientes = await this.prisma.usuarios.findMany({
         where: { id: { in: pacienteIds } },
-        select: { id: true, name: true },
+        select: { id: true, name: true, ci: true },
       });
-      const pacienteMap = new Map(pacientes.map((p) => [p.id, p.name]));
+      const pacienteMap = new Map(
+        pacientes.map((p) => [p.id, { name: p.name, ci: p.ci }]),
+      );
 
       return filtered.map((c) => {
         const dateObj = new Date(c.fecha);
         const [datePart, timePart] = dateObj.toISOString().split('T');
+        const pInfo = pacienteMap.get(c.pacienteId);
         return {
           id: c.id,
           paciente_id: c.pacienteId,
-          paciente_nombre:
-            pacienteMap.get(c.pacienteId) || 'Paciente no especificado',
+          paciente_nombre: pInfo?.name || 'Paciente no especificado',
+          paciente_ci: pInfo?.ci || 'No registrado',
           medico_id: doctorMap.get(c.doctorId) || 'Médico no especificado',
           clinica_id: 'Hospital Central',
           especialidad: c.especialidad,
