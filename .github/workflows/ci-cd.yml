@@ -44,7 +44,7 @@ jobs: #1er job
         run: npm run build #crea la carpeta dist 
 
       - name: Validate Docker Build Context #prueba si el docker esta en condiciones de ser construido y que los archivos del docker esten bien 
-        run: docker build -t backend:latest .
+        run: docker build -t backend:latest . #borrar redundante 
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4 #valida todo antes de mandarlo al sig job 
