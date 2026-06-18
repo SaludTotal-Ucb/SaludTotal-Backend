@@ -10,4 +10,9 @@ export interface RegisterDto {
   email: string;
   password: string;
   phone?: string;
+  birthDate?: string;
+  gender?: string;
+  bloodType?: string;
+  address?: string;
+  emergencyContact?: string;
 }

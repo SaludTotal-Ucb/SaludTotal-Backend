@@ -1,4 +1,4 @@
-﻿import { randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { rol_usuario } from '@prisma/client';
@@ -39,9 +39,17 @@ export class SupabaseAuthRepository implements IAuthRepository {
   async save(
     usuario: Omit<Usuario, 'id'>,
     passwordPlain: string,
+    profileData?: {
+      birthDate?: string;
+      gender?: string;
+      bloodType?: string;
+      address?: string;
+      emergencyContact?: string;
+    },
   ): Promise<Usuario> {
     const id = randomUUID();
     const hash = await bcryptjs.hash(passwordPlain, 10); //aca encripta a la hora de guardar con un peso de 10
+    const resolvedRole = this.toPrismaRole(usuario.roles);
 
     const saved = await this.prisma.usuarios.create({
       data: {
@@ -51,9 +59,25 @@ export class SupabaseAuthRepository implements IAuthRepository {
         email: usuario.email,
         phone: usuario.phone ?? null,
         password: hash,
-        rol: this.toPrismaRole(usuario.roles),
+        rol: resolvedRole,
       },
     });
+
+    if (resolvedRole === rol_usuario.paciente) {
+      await this.prisma.historial_medicos.create({
+        data: {
+          paciente_id: id,
+          tipo_sangre: profileData?.bloodType || 'O+',
+          alergias: [],
+          tratamientos_en_curso: [],
+          afecciones: [],
+          genero: profileData?.gender || null,
+          fecha_nacimiento: profileData?.birthDate || null,
+          direccion: profileData?.address || null,
+          contacto_emergencia: profileData?.emergencyContact || null,
+        },
+      });
+    }
 
     return this.toDomain(saved);
   }
