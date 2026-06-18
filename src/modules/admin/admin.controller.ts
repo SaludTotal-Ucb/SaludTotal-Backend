@@ -206,6 +206,14 @@ export class AdminController {
         },
       });
 
+      const citasCompletadas = await this.prisma.citas.count({
+        where: { estado: 'completed' },
+      });
+
+      const citasPendientes = await this.prisma.citas.count({
+        where: { estado: 'pending' },
+      });
+
       const activePenalties = await this.prisma.penalizaciones.findMany({
         where: {
           fecha_fin: {
@@ -282,6 +290,8 @@ export class AdminController {
           medicos: totalMedicos,
           clinicas: totalClinicas,
           citasHoy,
+          citasCompletadas,
+          citasPendientes,
         },
         penalties: mappedPenalties,
         recentActivity: activity,
@@ -585,6 +595,114 @@ export class AdminController {
     } catch (_error) {
       throw new HttpException(
         { success: false, message: 'Error al obtener estadísticas del doctor' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('admin/citas')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener todas las citas de todos los hospitales (Solo Admin)',
+  })
+  async getAllAppointments() {
+    try {
+      const appointments = await this.prisma.citas.findMany({
+        include: {
+          usuarios_citas_paciente_idTousuarios: {
+            select: {
+              name: true,
+              ci: true,
+            },
+          },
+          usuarios_citas_medico_idTousuarios: {
+            select: {
+              name: true,
+              detalles_medicos: {
+                include: {
+                  clinicas: {
+                    select: {
+                      nombre: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          fecha: 'desc',
+        },
+      });
+
+      return appointments.map((apt) => {
+        const dateObj = new Date(apt.fecha);
+        const [datePart, timePart] = dateObj.toISOString().split('T');
+        return {
+          id: apt.id,
+          patient:
+            apt.usuarios_citas_paciente_idTousuarios?.name ||
+            'Paciente no identificado',
+          patientCI: apt.usuarios_citas_paciente_idTousuarios?.ci || 'Sin CI',
+          doctor:
+            apt.usuarios_citas_medico_idTousuarios?.name ||
+            'Médico no especificado',
+          specialty: apt.especialidad,
+          clinic:
+            apt.usuarios_citas_medico_idTousuarios?.detalles_medicos?.clinicas
+              ?.nombre || 'Hospital Central',
+          date: datePart,
+          time: timePart.substring(0, 5),
+          status: apt.estado.toLowerCase(),
+        };
+      });
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al obtener las citas' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('admin/pacientes')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Listar todos los pacientes del sistema (Solo Admin)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Listado de pacientes recuperado con éxito.',
+  })
+  async getPacientes() {
+    try {
+      const pacientes = await this.prisma.usuarios.findMany({
+        where: { rol: 'paciente' },
+        select: {
+          id: true,
+          name: true,
+          ci: true,
+          email: true,
+          phone: true,
+          created_at: true,
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      });
+
+      return pacientes.map((p) => ({
+        id: p.id,
+        name: p.name,
+        ci: p.ci,
+        email: p.email,
+        phone: p.phone || 'No registrado',
+        createdAt: p.created_at || new Date(),
+      }));
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al obtener la lista de pacientes' },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
