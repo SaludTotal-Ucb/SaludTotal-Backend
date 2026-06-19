@@ -379,7 +379,7 @@ export class HistorialController {
           }
         }
 
-        // 3. Crear la consulta médica
+        // 3. Crear la consulta médica con sus recetas asociadas
         const consulta = await this.prisma.consultas_medicas.create({
           data: {
             expediente_id: expediente.id,
@@ -388,6 +388,27 @@ export class HistorialController {
             descripcion: body.descripcion || body.motivo || '',
             severidad: severidadMapeada,
             tratamiento: body.tratamiento || '',
+            ...(body.recetas &&
+              body.recetas.length > 0 && {
+                recetas: {
+                  create: body.recetas.map(
+                    (r: {
+                      medicamento: string;
+                      dosis: string;
+                      frecuencia: string;
+                      indicaciones?: string;
+                    }) => ({
+                      medicamento: r.medicamento,
+                      dosis: r.dosis,
+                      frecuencia: r.frecuencia,
+                      indicaciones: r.indicaciones || '',
+                    }),
+                  ),
+                },
+              }),
+          },
+          include: {
+            recetas: true,
           },
         });
 
