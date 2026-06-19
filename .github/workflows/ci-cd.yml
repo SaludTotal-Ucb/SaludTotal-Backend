@@ -67,9 +67,7 @@ jobs: #1er job
           name: backend-dist
           path: dist/
 
-      - name: Simulate Deployment
+      - name: Trigger Deployment
         run: |
-          echo " Deploying Backend to Production environment..."
-          echo "Simulating upload of dist/ folder..."
-          sleep 2
-          echo "Deployment successful!"
+          echo "Deploying Backend to Production environment..."
+          echo "Deployment is triggered automatically via Render webhook on push to main."
