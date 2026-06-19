@@ -640,8 +640,8 @@ export class AdminController {
       });
 
       return appointments.map((apt) => {
-        const dateObj = new Date(apt.fecha);
-        const [datePart, timePart] = dateObj.toISOString().split('T');
+        const boliviaTime = new Date(apt.fecha.getTime() - 4 * 60 * 60 * 1000);
+        const [datePart, timePart] = boliviaTime.toISOString().split('T');
         return {
           id: apt.id,
           patient:
@@ -779,6 +779,7 @@ export class AdminController {
       phone?: string;
       horarioAtencion?: string;
       numeroLicencia?: string;
+      clinicaId?: string;
     },
   ) {
     try {
@@ -792,7 +793,8 @@ export class AdminController {
       });
       if (
         body.horarioAtencion !== undefined ||
-        body.numeroLicencia !== undefined
+        body.numeroLicencia !== undefined ||
+        body.clinicaId !== undefined
       ) {
         await this.prisma.detalles_medicos.update({
           where: { usuario_id: id },
@@ -802,6 +804,9 @@ export class AdminController {
             }),
             ...(body.numeroLicencia !== undefined && {
               numero_licencia: body.numeroLicencia,
+            }),
+            ...(body.clinicaId !== undefined && {
+              clinica_id: body.clinicaId,
             }),
           },
         });
@@ -852,6 +857,7 @@ export class AdminController {
       email?: string;
       horario?: string;
       descripcion?: string;
+      especialidades?: string[];
     },
   ) {
     try {
@@ -869,6 +875,28 @@ export class AdminController {
           }),
         },
       });
+
+      if (body.especialidades) {
+        await this.prisma.clinica_especialidades.deleteMany({
+          where: { clinica_id: id },
+        });
+
+        for (const specName of body.especialidades) {
+          const spec = await this.prisma.especialidades.upsert({
+            where: { nombre: specName },
+            update: {},
+            create: { nombre: specName },
+          });
+
+          await this.prisma.clinica_especialidades.create({
+            data: {
+              clinica_id: id,
+              especialidad_id: spec.id,
+            },
+          });
+        }
+      }
+
       return {
         success: true,
         message: 'Clínica actualizada',
