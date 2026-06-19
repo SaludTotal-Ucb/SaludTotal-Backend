@@ -27,6 +27,8 @@ import { AgendarCitaUseCase } from '../../../application/use-cases/AgendarCitaUs
 // biome-ignore lint/style/useImportType: NestJS DI reflection
 import { CancelarCitaUseCase } from '../../../application/use-cases/CancelarCitaUseCase';
 // biome-ignore lint/style/useImportType: NestJS DI reflection
+import { CompletarCitaUseCase } from '../../../application/use-cases/CompletarCitaUseCase';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
 import { ConfirmarCitaUseCase } from '../../../application/use-cases/ConfirmarCitaUseCase';
 // biome-ignore lint/style/useImportType: NestJS DI reflection
 import { ObtenerCitasMedicoUseCase } from '../../../application/use-cases/ObtenerCitasMedicoUseCase';
@@ -45,6 +47,7 @@ export class CitasController {
     private readonly agendarCita: AgendarCitaUseCase,
     private readonly cancelarCita: CancelarCitaUseCase,
     private readonly confirmarCita: ConfirmarCitaUseCase,
+    private readonly completarCita: CompletarCitaUseCase,
     private readonly obtenerCitasPaciente: ObtenerCitasPacienteUseCase,
     private readonly obtenerCitasMedico: ObtenerCitasMedicoUseCase,
     @Inject(PrismaService) private readonly prisma: PrismaService,
@@ -191,6 +194,44 @@ export class CitasController {
         medicoId,
       });
       return { success: true, message: 'Cita confirmada', data: cita };
+    } catch (error: unknown) {
+      if (error instanceof CitaException) {
+        throw new HttpException(
+          { success: false, message: error.message },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw new HttpException(
+        { success: false, message: 'Error interno del servidor' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Patch(':id/completar')
+  @ApiOperation({
+    summary: 'Completar una cita médica al finalizar consulta (Médico)',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la cita médica a completar (UUID)',
+  })
+  @ApiResponse({ status: 200, description: 'Cita completada con éxito.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Token de autenticación inválido o ausente.',
+  })
+  async completar(@Param('id') citaId: string, @GetUserId() medicoId: string) {
+    try {
+      const cita = await this.completarCita.execute({
+        citaId,
+        medicoId,
+      });
+      return {
+        success: true,
+        message: 'Cita completada exitosamente',
+        data: cita,
+      };
     } catch (error: unknown) {
       if (error instanceof CitaException) {
         throw new HttpException(
