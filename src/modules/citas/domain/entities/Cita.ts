@@ -29,6 +29,21 @@ export class Cita {
       this.notas,
     );
   }
+
+  confirmar(): Cita {
+    if (this.estado !== 'PENDIENTE') {
+      throw new Error('Solo se pueden confirmar citas en estado PENDIENTE');
+    }
+    return new Cita(
+      this.id,
+      this.pacienteId,
+      this.doctorId,
+      this.fecha,
+      this.especialidad,
+      'CONFIRMADA',
+      this.notas,
+    );
+  }
 }
 
 export class Penalizacion {
