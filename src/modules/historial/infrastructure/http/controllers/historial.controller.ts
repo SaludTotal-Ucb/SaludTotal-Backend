@@ -218,19 +218,18 @@ export class HistorialController {
       return {
         name: usuario.name,
         ci: usuario.ci,
-        age: 35,
-        bloodType: historialEstatico?.tipo_sangre || 'O+',
+        age: null,
+        bloodType: historialEstatico?.tipo_sangre || 'No registrado',
         allergies:
           (historialEstatico?.alergias || []).join(', ') ||
           'Ninguna registrada',
-        phone: usuario.phone || 'No especificado',
+        phone: usuario.phone || 'No registrado',
         email: usuario.email,
-        birthDate: historialEstatico?.fecha_nacimiento || '15/05/1990',
-        gender: historialEstatico?.genero || 'Femenino',
-        address:
-          historialEstatico?.direccion || 'Av. 6 de Agosto #1234, La Paz',
+        birthDate: historialEstatico?.fecha_nacimiento || null,
+        gender: historialEstatico?.genero || 'No registrado',
+        address: historialEstatico?.direccion || 'No registrada',
         emergencyContact:
-          historialEstatico?.contacto_emergencia || 'Juan García - 71234567',
+          historialEstatico?.contacto_emergencia || 'No registrado',
         tratamientos: historialEstatico?.tratamientos_en_curso || [],
       };
     } catch (error) {
