@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
   Inject,
+  Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -703,6 +706,285 @@ export class AdminController {
     } catch (_error) {
       throw new HttpException(
         { success: false, message: 'Error al obtener la lista de pacientes' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // PACIENTES – EDIT & DELETE
+
+  @Patch('admin/pacientes/:id')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Editar datos de un paciente (Solo Admin)' })
+  async updatePaciente(
+    @Param('id') id: string,
+    @Body() body: {
+      name?: string;
+      email?: string;
+      phone?: string;
+      ci?: string;
+    },
+  ) {
+    try {
+      const updated = await this.prisma.usuarios.update({
+        where: { id },
+        data: {
+          ...(body.name && { name: body.name }),
+          ...(body.email && { email: body.email }),
+          ...(body.phone !== undefined && { phone: body.phone }),
+          ...(body.ci && { ci: body.ci }),
+        },
+      });
+      return {
+        success: true,
+        message: 'Paciente actualizado',
+        data: { id: updated.id, name: updated.name },
+      };
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al actualizar el paciente' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete('admin/pacientes/:id')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar un paciente (Solo Admin)' })
+  async deletePaciente(@Param('id') id: string) {
+    try {
+      await this.prisma.usuarios.delete({ where: { id } });
+      return { success: true, message: 'Paciente eliminado correctamente' };
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al eliminar el paciente' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // MÉDICOS – EDIT & DELETE
+
+  @Patch('admin/medicos/:id')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Editar datos de un médico (Solo Admin)' })
+  async updateMedico(
+    @Param('id') id: string,
+    @Body() body: {
+      name?: string;
+      email?: string;
+      phone?: string;
+      horarioAtencion?: string;
+      numeroLicencia?: string;
+    },
+  ) {
+    try {
+      const updated = await this.prisma.usuarios.update({
+        where: { id },
+        data: {
+          ...(body.name && { name: body.name }),
+          ...(body.email && { email: body.email }),
+          ...(body.phone !== undefined && { phone: body.phone }),
+        },
+      });
+      if (
+        body.horarioAtencion !== undefined ||
+        body.numeroLicencia !== undefined
+      ) {
+        await this.prisma.detalles_medicos.update({
+          where: { usuario_id: id },
+          data: {
+            ...(body.horarioAtencion !== undefined && {
+              horario_atencion: body.horarioAtencion,
+            }),
+            ...(body.numeroLicencia !== undefined && {
+              numero_licencia: body.numeroLicencia,
+            }),
+          },
+        });
+      }
+      return {
+        success: true,
+        message: 'Médico actualizado',
+        data: { id: updated.id, name: updated.name },
+      };
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al actualizar el médico' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete('admin/medicos/:id')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar un médico (Solo Admin)' })
+  async deleteMedico(@Param('id') id: string) {
+    try {
+      // detalles_medicos uses cascade delete from usuarios, so just delete the user
+      await this.prisma.usuarios.delete({ where: { id } });
+      return { success: true, message: 'Médico eliminado correctamente' };
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al eliminar el médico' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // CLÍNICAS – EDIT & DELETE
+
+  @Patch('admin/clinicas/:id')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Editar datos de una clínica (Solo Admin)' })
+  async updateClinica(
+    @Param('id') id: string,
+    @Body() body: {
+      nombre?: string;
+      ciudad?: string;
+      direccion?: string;
+      telefono?: string;
+      email?: string;
+      horario?: string;
+      descripcion?: string;
+    },
+  ) {
+    try {
+      const updated = await this.prisma.clinicas.update({
+        where: { id },
+        data: {
+          ...(body.nombre && { nombre: body.nombre }),
+          ...(body.ciudad && { ciudad: body.ciudad }),
+          ...(body.direccion && { direccion: body.direccion }),
+          ...(body.telefono !== undefined && { telefono: body.telefono }),
+          ...(body.email !== undefined && { email: body.email }),
+          ...(body.horario !== undefined && { horario: body.horario }),
+          ...(body.descripcion !== undefined && {
+            descripcion: body.descripcion,
+          }),
+        },
+      });
+      return {
+        success: true,
+        message: 'Clínica actualizada',
+        data: { id: updated.id, nombre: updated.nombre },
+      };
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al actualizar la clínica' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete('admin/clinicas/:id')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar una clínica (Solo Admin)' })
+  async deleteClinica(@Param('id') id: string) {
+    try {
+      await this.prisma.clinica_especialidades.deleteMany({
+        where: { clinica_id: id },
+      });
+      await this.prisma.clinicas.delete({ where: { id } });
+      return { success: true, message: 'Clínica eliminada correctamente' };
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al eliminar la clínica' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // CITAS – EDIT, DELETE & CREATE (Admin)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  @Patch('admin/citas/:id')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Editar estado/fecha de una cita (Solo Admin)' })
+  async updateCita(
+    @Param('id') id: string,
+    @Body() body: { estado?: string; fecha?: string; notas?: string },
+  ) {
+    try {
+      const updated = await this.prisma.citas.update({
+        where: { id },
+        data: {
+          // biome-ignore lint/suspicious/noExplicitAny: prisma enum cast
+          ...(body.estado && { estado: body.estado as any }),
+          ...(body.fecha && { fecha: new Date(body.fecha) }),
+          ...(body.notas !== undefined && { notas: body.notas }),
+        },
+      });
+      return {
+        success: true,
+        message: 'Cita actualizada',
+        data: { id: updated.id },
+      };
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al actualizar la cita' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete('admin/citas/:id')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar una cita (Solo Admin)' })
+  async deleteCita(@Param('id') id: string) {
+    try {
+      await this.prisma.citas.delete({ where: { id } });
+      return { success: true, message: 'Cita eliminada correctamente' };
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al eliminar la cita' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('admin/citas')
+  @UseGuards(JwtAuthGuard, createRolesGuard(['admin']))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear una cita como administrador' })
+  async createCitaAsAdmin(
+    @Body() body: {
+      pacienteId: string;
+      medicoId: string;
+      fecha: string;
+      especialidad: string;
+      notas?: string;
+    },
+    @GetUserId() _adminId: string,
+  ) {
+    try {
+      const cita = await this.prisma.citas.create({
+        data: {
+          paciente_id: body.pacienteId,
+          medico_id: body.medicoId,
+          fecha: new Date(body.fecha),
+          especialidad: body.especialidad,
+          notas: body.notas || '',
+          estado: 'confirmed',
+        },
+      });
+      return {
+        success: true,
+        message: 'Cita creada por administrador',
+        data: { id: cita.id },
+      };
+    } catch (_error) {
+      throw new HttpException(
+        { success: false, message: 'Error al crear la cita' },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
