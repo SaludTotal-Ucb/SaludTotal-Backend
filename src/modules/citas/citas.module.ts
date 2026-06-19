@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { AgendarCitaUseCase } from './application/use-cases/AgendarCitaUseCase';
 import { CancelarCitaUseCase } from './application/use-cases/CancelarCitaUseCase';
+import { CompletarCitaUseCase } from './application/use-cases/CompletarCitaUseCase';
 import { ConfirmarCitaUseCase } from './application/use-cases/ConfirmarCitaUseCase';
 import { ObtenerCitasMedicoUseCase } from './application/use-cases/ObtenerCitasMedicoUseCase';
 import { ObtenerCitasPacienteUseCase } from './application/use-cases/ObtenerCitasPacienteUseCase';
@@ -41,6 +42,7 @@ import { SupabaseCitaRepository } from './infrastructure/persistence/SupabaseCit
       useFactory: (repo) => new ConfirmarCitaUseCase(repo),
       inject: [I_CITA_REPOSITORY],
     },
+    CompletarCitaUseCase,
   ],
 })
 export class CitasModule {}
