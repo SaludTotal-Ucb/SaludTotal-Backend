@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import type { PrismaService } from '../../../../prisma/prisma.service';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+// biome-ignore lint/style/useImportType: NestJS DI reflection
+import { PrismaService } from '../../../../prisma/prisma.service';
 import { CitaNoEncontradaException } from '../../domain/exceptions/CitaExceptions';
 
 @Injectable()
 export class CompletarCitaUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async execute(params: { citaId: string; medicoId: string }) {
     const { citaId, medicoId } = params;
