@@ -58,7 +58,7 @@ jobs: #1er job
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://api.saludtotal.com # url simulada para cambiar en el final 
+      url: https://saludtotal-backend-gpcs.onrender.com
       
     steps:
       - name: Download Build Artifact
