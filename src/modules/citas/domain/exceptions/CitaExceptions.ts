@@ -22,3 +22,9 @@ export class HorarioOcupadoException extends CitaException {
     super('El doctor ya tiene una cita en ese horario');
   }
 }
+
+export class FechaPasadaException extends CitaException {
+  constructor() {
+    super('No se puede agendar una cita en una fecha u hora pasada');
+  }
+}

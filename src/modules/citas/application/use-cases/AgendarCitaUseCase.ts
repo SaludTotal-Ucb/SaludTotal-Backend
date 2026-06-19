@@ -1,5 +1,6 @@
 import { Cita } from '../../domain/entities/Cita';
 import {
+  FechaPasadaException,
   HorarioOcupadoException,
   PacientePenalizadoException,
 } from '../../domain/exceptions/CitaExceptions';
@@ -10,6 +11,10 @@ export class AgendarCitaUseCase {
   constructor(private readonly repository: ICitaRepository) {}
 
   async execute(dto: CrearCitaDto): Promise<Cita> {
+    if (dto.fecha < new Date()) {
+      throw new FechaPasadaException();
+    }
+
     const penalizacionActiva = await this.repository.getPenalizacionActiva(
       dto.pacienteId,
     );

@@ -231,8 +231,8 @@ export class CitasController {
       const doctorMap = new Map(doctors.map((d) => [d.id, d.name]));
 
       return citas.map((c) => {
-        const dateObj = new Date(c.fecha);
-        const [datePart, timePart] = dateObj.toISOString().split('T');
+        const boliviaTime = new Date(c.fecha.getTime() - 4 * 60 * 60 * 1000);
+        const [datePart, timePart] = boliviaTime.toISOString().split('T');
         return {
           id: c.id,
           paciente_id: c.pacienteId,
@@ -332,8 +332,8 @@ export class CitasController {
       );
 
       return filtered.map((c) => {
-        const dateObj = new Date(c.fecha);
-        const [datePart, timePart] = dateObj.toISOString().split('T');
+        const boliviaTime = new Date(c.fecha.getTime() - 4 * 60 * 60 * 1000);
+        const [datePart, timePart] = boliviaTime.toISOString().split('T');
         const pInfo = pacienteMap.get(c.pacienteId);
         return {
           id: c.id,
